@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<!--
+	Exhibit Data Visualization Prototype
+	Authors:  Jonesy
+	Last Updated: 1/27/2026
+	
+	This page is meant to demonstrate basic functionality for visualization of exhibit usage tracking data. Data is pulled from an SQL database and organized in a variety of ways.
+-->
+
+<html>
+    <head>
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+		<meta http-equiv="Pragma" content="no-cache"/>
+		<meta http-equiv="Expires" content="0" />
+
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="dataVisualization.css">
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		<script src="js/globals.js"></script>
+		<script src="js/tableClass.js"></script>
+		<script src="js/chartFunctions.js"></script>
+		<script src="js/helperFunctions.js"></script>
+		<script src="js/HTMLsetup.js" type="module"></script>
+	</head>
+	<body>
+		<div id="inputDiv" class="container-fluid">
+			<div id="selectDiv">
+				<label for="selectGallery">Choose a gallery:</label>
+				<select id="selectGallery"></select>
+				<label for="selectExhibit">Choose an exhibit:</label>
+				<select id="selectExhibit"></select>
+
+				<label for="selectData">Choose data:</label>
+				<select id="selectData"></select>
+			</div>
+			<div id="filterDiv">
+				<label for="selectChart">Choose a chart:</label>
+				<select id="selectChart">
+					<option value="date">Sort by date</option>
+					<option value="day">Sort by day</option>
+					<option value="hour">Sort by hour</option>
+					<option value="dayAndHour">Sort by day and hour</option>
+				</select>
+				<label for="selectDay" id="dayLabel" style="visibility: hidden">Choose a day:</label>
+				<select id="selectDay" style="visibility: hidden"></select>
+				<label id="monthLabel" for="monthFilter">Filter by month:</label>
+				<input type="checkbox" id="monthFilter">
+				<div id="monthSelectDisplay">
+					<button id="leftMonthArrow" class="monthArrow" style="opacity: 0.25;">&larr;</button>
+					<h6 id="monthDisplay"></h6>
+					<button id="rightMonthArrow" class="monthArrow">&rarr;</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="chartDiv" class="container-fluid">
+			<h2 id="backgroundText"class="row justify-content-center"></h2>
+			<button id="compareButton">Compare exhibits of this group</button>
+			<canvas id="chartCanvas" class="row justify-content-center"></canvas>
+		</div>
+		<div id="grayoutDiv" class="container-fluid"></div>
+		<div id="overviewDiv">
+			<h4 id="overviewTitle">Overview:</h4>
+			<div class="overviewContainer">
+				<h5 id="overviewExhibit" class="overviewLabel"></h5>
+				<button id="overviewExhibitButton" class="overviewButton">Next</button>
+			</div>
+			<div class="overviewContainer">
+				<h5 id="overviewType" class="overviewLabel"></h5>
+				<button id="overviewTypeButton" class="overviewButton">Next</button>
+			</div>
+			<h5 id="overviewData"></h5>
+		</div>
+		<div id="popoutDiv" class="container-fluid">
+			<h2 id="popoutTitle">hello</h2>
+			<div class="row justify-content-between">
+				<div id="popoutChartDiv" class="col-4">
+					<canvas id="popoutCanvas"></canvas>
+					<button id="YoYButton">Compare this date year over year</button>	
+				</div>
+				<div id="popoutDataDiv" class="col-7">
+					<h3 id="popoutData"></h3>
+
+					<button id="closePopout">X</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

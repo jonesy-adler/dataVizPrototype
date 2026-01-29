@@ -1,0 +1,457 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<title>Results</title>
+		<link href='http://fonts.googleapis.com/css?family=Roboto:100,400,700' rel='stylesheet' type='text/css'>
+		<!-- Bootstrap -->
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="Results.css" rel="stylesheet">
+		<link rel="apple-touch-icon" href="Results.png">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->		
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+		<script src="Chart.js"></script>
+		<script type="text/javascript">			
+	
+			var responses = [];
+			
+			responses[0] = [0,0,0];
+			responses[1] = [0, 0, 0];
+			responses[2] = [0, 0, 0, 0, 0];
+						
+			var responseKey = [];
+			
+			responseKey[0] = ["Is this your first visit to the Adler Planetarium?", "yes","no"];
+			responseKey[1] = ["Have you visited any other planetariums?", "yes","no"];
+			responseKey[2] = ["Where do you live?", "Chicago","Chicago Suburb","Elsewhere in USA","Elsewhere in World"];
+									
+			var allEntries = [];
+			var totalRecords=0;
+		
+			var sortTotals=0;
+			var sortingI=0;
+			var sortingJ=0;
+
+
+			function reinitialize()
+			{
+				responses[0][1]=0; //yes
+				responses[0][2]=0; //no
+			
+				responses[1][1]=0; //yes
+				responses[1][2]=0; //no
+			
+				responses[2][1]=0; //Chicago
+				responses[2][2]=0; //Chicago Suburb
+				responses[2][3]=0; //Elsewhere in USA
+				responses[2][4]=0; //Elsewhere in World
+			
+				sortTotals=0;
+			}
+			
+			function myCallback(root)
+			{
+				
+				var feed = root.feed;
+				var entries = feed.entry || [];
+
+				var cells = [];
+				var counter = 0;
+
+				for (var i = 0; i < entries.length; ++i)
+				{
+					if(counter==4)
+					{
+						allEntries.push(cells);
+						counter=0;
+						cells = [];
+						totalRecords++;						
+					}
+					
+					var entry1=entries[i];
+					
+					if (counter==0)				
+						cells[counter] = new Date(entry1.content.$t);
+					else
+						cells[counter] = entry1.content.$t;
+					
+					counter++;										
+				}
+				
+				tabulateNoLimits();
+				
+				
+			}		
+
+			function myCallbackU(rootU)
+			{
+				
+				var feedU = rootU.feed;
+				var entriesU = feedU.entry || [];
+
+				var cellsU = [];
+				var counterU = 0;
+				
+				totalRecords=0;
+				allEntries=[];
+				
+				for (var i = 0; i < entriesU.length; ++i)
+				{
+					if(counterU==4)
+					{
+						allEntries.push(cellsU);
+						counterU=0;
+						cellsU = [];
+						totalRecords++;						
+					}
+					
+					var entry1U=entriesU[i];
+					
+					if (counterU==0)				
+						cellsU[counterU] = new Date(entry1U.content.$t);
+					else
+						cellsU[counterU] = entry1U.content.$t;
+					
+					counterU++;										
+				}
+				
+				reDraw(sortingI,sortingJ,1);
+				graphU();
+				
+				
+			}
+			
+			function reDraw(i,j,reDraw)
+			{
+				var dateI = document.getElementById("dateFieldI").value;
+				var dateF = document.getElementById("dateFieldF").value;
+							
+				
+				if(reDraw==1)
+				{
+					sortingI=i;
+					sortingJ=j;
+				}
+				else
+				{
+					if((sortingI==i)&&(sortingJ==j))
+					{
+						sortingI=0;
+						sortingJ=0;
+					
+						var ele = document.getElementsByName("criteria");
+						for(var i=0;i<ele.length;i++)
+							ele[i].checked = false;
+					}
+					else
+					{
+						sortingI=i;
+						sortingJ=j;
+					}
+				}
+				reinitialize();
+				
+				sortTotals=0;
+						
+				if((dateI!="")&&(dateF!="")&&(sortingJ!=0))
+				{
+					for(var k=0; k<totalRecords ; ++k)
+					{
+						var entryDate=allEntries[k][0].getFullYear() + "-" + ('0' + (allEntries[k][0].getMonth()+1)).slice(-2) + "-" + ('0' + allEntries[k][0].getDate()).slice(-2);
+						
+						if ((entryDate>=dateI) && (entryDate<=dateF)&&(allEntries[k][sortingI+1]==responseKey[sortingI][sortingJ]))
+						{
+							tabulateLimits(k);
+							sortTotals++;
+						}
+					}
+				}
+				else if(((dateI=="")||(dateF==""))&&(sortingJ!=0))
+				{
+					for(var k=0; k<totalRecords ; ++k)
+					{
+						if (allEntries[k][sortingI+1]==responseKey[sortingI][sortingJ])
+						{
+							tabulateLimits(k);
+							sortTotals++;
+						}
+					}
+				}
+				else if((dateI!="")&&(dateF!="")&&(sortingJ==0))
+				{
+					for(var k=0; k<totalRecords ; ++k)
+					{
+						var entryDate=allEntries[k][0].getFullYear() + "-" + ('0' + (allEntries[k][0].getMonth()+1)).slice(-2) + "-" + ('0' + allEntries[k][0].getDate()).slice(-2);
+						
+						if ((entryDate>=dateI) && (entryDate<=dateF))
+						{
+							tabulateLimits(k);
+							sortTotals++;
+						}
+					}
+				}
+				else
+					tabulateNoLimits();
+															
+				graphU();
+			}
+			
+			function tabulateLimits(index)
+			{
+								
+				if (allEntries[index][1]==responseKey[0][1])
+						responses[0][1]++;
+					else if (allEntries[index][1]==responseKey[0][2])
+						responses[0][2]++;
+					else;
+				
+					if (allEntries[index][2]==responseKey[1][1])
+						responses[1][1]++;
+					else if (allEntries[index][2]==responseKey[1][2])
+						responses[1][2]++;
+					else;
+
+					if (allEntries[index][3]==responseKey[2][1])
+						responses[2][1]++;
+					else if (allEntries[index][3]==responseKey[2][2])
+						responses[2][2]++;
+					else if (allEntries[index][3]==responseKey[2][3])
+						responses[2][3]++;
+					else if (allEntries[index][3]==responseKey[2][4])
+						responses[2][4]++;
+					else;
+			}
+		
+			function tabulateNoLimits()
+			{
+				reinitialize();
+											
+				for (var j = 0; j < totalRecords; ++j)
+				{
+					if (allEntries[j][1]==responseKey[0][1])
+						responses[0][1]++;
+					else if (allEntries[j][1]==responseKey[0][2])
+						responses[0][2]++;
+					else;
+				
+					if (allEntries[j][2]==responseKey[1][1])
+						responses[1][1]++;
+					else if (allEntries[j][2]==responseKey[1][2])
+						responses[1][2]++;
+					else;
+
+					if (allEntries[j][3]==responseKey[2][1])
+						responses[2][1]++;
+					else if (allEntries[j][3]==responseKey[2][2])
+						responses[2][2]++;
+					else if (allEntries[j][3]==responseKey[2][3])
+						responses[2][3]++;
+					else if (allEntries[j][3]==responseKey[2][4])
+						responses[2][4]++;
+					else;
+
+				}
+			}
+
+			
+
+			function graph()
+			{
+				var barChartData = {
+				labels : [responseKey[0][1],responseKey[0][2]],
+				datasets : [
+					{
+						fillColor : "rgba(0,77,153,1)",
+						strokeColor : "rgba(0,77,153,1)",
+						highlightFill: "rgba(0,77,153,1)",
+						highlightStroke: "rgba(0,77,153,1)",
+						tooltipFillColor: "rgba(0,77,153,1)",
+						data : [responses[0][1],responses[0][2]]
+					}
+				]}
+				
+				document.getElementById("graphTitle1").innerHTML = "<span style='color:#004d99'>"+responseKey[0][0]+"</span>";
+				
+				var barChartData2 = {
+				labels : [responseKey[1][1],responseKey[1][2]],
+				datasets : [
+					{
+						fillColor : "rgba(112,112,219,1)",
+						strokeColor : "rgba(112,112,219,1)",
+						highlightFill : "rgba(112,112,219,1)",
+						highlightStroke : "rgba(112,112,219,1)",
+						tooltipFillColor : "rgba(112,112,219,1)",
+						data : [responses[1][1],responses[1][2]]
+					}
+				]}
+				
+				document.getElementById("graphTitle2").innerHTML = "<span style='color:#7070db'>"+responseKey[1][0]+"</span>";
+				
+				var pieData = [
+				{
+					value: responses[2][1],
+					color:"#527a7a",
+					highlight: "#527a7a",
+					label: responseKey[2][1]
+				},
+				{
+					value: responses[2][2],
+					color: "#006652",
+					highlight: "#006652",
+					label: responseKey[2][2]
+				},
+				{
+					value: responses[2][3],
+					color: "#0066cc",
+					highlight: "#0066cc",
+					label: responseKey[2][3]
+				},
+				{
+					value: responses[2][4],
+					color: "#3d0099",
+					highlight: "#3d0099",
+					label: responseKey[2][4]
+				}
+				];
+				
+				document.getElementById("graphTitle3").innerHTML = "<span style='color:#006699'>"+responseKey[2][0]+"</span>";
+			
+				
+				
+				var ctx1 = document.getElementById("canvas1").getContext("2d");
+				window.myBar1 = new Chart(ctx1).Bar(barChartData, {
+					responsive : true,
+					scaleFontStyle: "bold",
+					scaleFontSize: "16",
+					 animation : false,
+					
+				});
+				
+						
+				
+				var ctx2 = document.getElementById("canvas2").getContext("2d");
+				window.myBar2 = new Chart(ctx2).Bar(barChartData2, {
+					responsive : true,
+					scaleFontStyle: "bold",
+					scaleFontSize: "16",
+					 animation : false,
+					
+				});
+				
+					
+					
+				var ctx3 = document.getElementById("canvas3").getContext("2d");
+				window.myPie1 = new Chart(ctx3).Pie(pieData, { responsive : true, animation : false});
+
+				document.getElementById("pieLegendDiv").innerHTML = myPie1.generateLegend();
+				
+				if(sortTotals!=0)
+					document.getElementById("records").innerHTML = sortTotals;
+				else
+					document.getElementById("records").innerHTML = totalRecords;
+				
+				
+			} 
+			
+			 function graphU()
+			 {
+				myBar1.destroy();
+				myBar2.destroy();
+				myPie1.destroy();
+				
+				graph();
+			}
+			
+			function update(scriptName)
+			{
+								
+				var docHeadObj = document.getElementsByTagName("head")[0];
+				var dynamicScript = document.createElement("script");
+				dynamicScript.type = "text/javascript";
+				dynamicScript.src = scriptName;
+				docHeadObj.appendChild(dynamicScript);
+								
+			}
+		</script>
+		<script src="https://spreadsheets.google.com/feeds/cells/1xKDozDTp00sr3NoQYKFr5Wk5tzInnAxrQhqK3qmoJZ4/1/public/values?alt=json-in-script&callback=myCallback"></script>
+	</head>	
+	<body onload="graph()" class="container-fluid">
+		<div class="row">
+			<div class="col-xs-18 col-lg-12" id="surveyTitle">Demographics 1 Survey Results</div>
+		</div>
+		<form id="form" name="form" onsubmit="return false;">
+			<div class="row">
+				<div class="col-xs-18 col-lg-12" id="fieldName">
+					Date Range: 
+					<input type="date" id="dateFieldI" ></input>
+					to
+					<input type="date" id="dateFieldF"></input>
+				</div>
+				<div class="col-xs-18 col-lg-12" id="fieldName2">
+					Further restrict results by: 
+					<span style="font-size:0.6em">(Select one.  Select again to remove restriction.  Works in conjunction with the date restriction.)</span>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-18 col-lg-12">
+					<span id="questions">Is this your first visit to the Adler Planetarium?  </span><br>
+					<input type="radio" name="criteria" onclick="reDraw(0,1,0)" style="margin-left:3%">Yes
+					<input type="radio" name="criteria" onclick="reDraw(0,2,0)" style="margin-left:3%"> No<br>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-18 col-lg-12">
+					<span id="questions">Have you visited any other planetariums?  </span><br>
+					<input type="radio" name="criteria" onclick="reDraw(1,1,0)" style="margin-left:3%"> Yes
+					<input type="radio" name="criteria" onclick="reDraw(1,2,0)" style="margin-left:3%"> No<br>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-18 col-lg-12">
+					<span id="questions">Where do you live?  </span><br>
+					<input type="radio" name="criteria" onclick="reDraw(2,1,0)" style="margin-left:3%"> Chicago
+					<input type="radio" name="criteria" onclick="reDraw(2,2,0)" style="margin-left:3%"> Chicago Suburb
+					<input type="radio" name="criteria" onclick="reDraw(2,3,0)" style="margin-left:3%"> Elsewhere in USA
+					<input type="radio" name="criteria" onclick="reDraw(2,4,0)" style="margin-left:3%"> Elsewhere in World
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-18 col-lg-12">
+					<button type="button" value="" onclick="update('https://spreadsheets.google.com/feeds/cells/1xKDozDTp00sr3NoQYKFr5Wk5tzInnAxrQhqK3qmoJZ4/1/public/values?alt=json-in-script&callback=myCallbackU')" id="reDrawButton" class="btn btn-primary">Update Data</button>
+				</div>
+				<div class="col-xs-18 col-lg-12">
+					Records being displayed: <span id="records"></span>
+				</div>
+			</div>
+		</form>
+		<div class="row">
+			<div width="50%">
+				<div id="graphTitle1"></div>
+				<canvas id="canvas1" height="400" width="600"></canvas>
+			</div>
+			<div class="col-xs-8 col-sm-6 col-lg-6">
+				<div id="graphTitle2"></div>
+				<canvas id="canvas2" height="400" width="600"></canvas>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-8 col-sm-6 col-lg-6">
+				<div id="graphTitle3"></div>
+				<canvas id="canvas3" height="400" width="600" ></canvas>
+			</div>
+			<div class="col-xs-8 col-sm-6 col-lg-6">
+				<div id="pieLegendDiv" ></div>
+			</div>
+		</div>	
+	</body>
+</html>

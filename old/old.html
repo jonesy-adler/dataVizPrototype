@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<link rel="stylesheet" type="text/css" href="dataVisualization.css">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script type="module">   
+
+			import {htmlSetup} from './js/HTMLsetup.js';
+
+			const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+			const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+
+
+			const exhibitNames = ['OW-10', 'OW-12', 'OW-15'];
+			const tableNames = ['videoActivationDwells', 'allDwells'];
+
+			var currentChart = "byDate";
+			var currentExhibit = exhibitNames[0];
+			var currentTable = tableNames[0];
+			var currentDay = "Sunday";
+			var chart = null;
+			var doubleChart = false;
+			var allExhibits = false;
+			var monthView = false;
+			var currentMonth = null;
+			var currentYear = null;
+			var startingMonth = null;
+			var startingYear = null;
+			var endingMonth = null;
+			var endingYear = null;
+			
+			const canvas = document.getElementById('chartCanvas');
+		
+			async function getPhpResponse(table){
+                const response = await fetch(`http://alkaid.adlerplanetarium.org/exhibitDataVisualization/php/fetchData.php?table=${table}`);
+                const data = await response.json();
+                return data.map(item => ({date: item.timestamp.split(" ")[0], time: item.timestamp.split(" ")[1]}));
+            }
+
+			function sortByDate(data){
+				let currentDate = '';
+				const arrayByDate = {};
+				data.forEach(entry => {
+					if (entry.date != currentDate){
+						currentDate = entry.date;
+						arrayByDate[currentDate] = [];
+					}
+					
+					arrayByDate[currentDate].push(entry);
+				});
+				return arrayByDate;
+			}
+
+			function sortByDay(data){
+				const arrayByDay = {};
+				dayNames.forEach(day => {
+					arrayByDay[day] = [];
+				});
+
+				data.forEach(entry => {
+					let day = new Date(entry.date).getDay();
+					arrayByDay[dayNames[day]].push(entry);
+				});
+				return arrayByDay;
+			}
+
+			function sortByHour(data){
+				const arrayByHour = {}
+				hours.forEach(hour => {
+					arrayByHour[hour] = [];
+				});
+
+				data.forEach(entry => {
+					let hour = entry.time.split(':')[0];
+					if (hour >=9 && hour <= 21){
+						arrayByHour[`${hour}:00`].push(entry);
+					}
+
+				});
+				return arrayByHour;
+			}
+
+			function filterByMonth(data){
+				const monthData = {};
+				for (const category in data){
+					monthData[category] = [];
+					data[category].forEach((entry, index) => {
+						if (data[category][index].date.split('-')[0] == currentYear && data[category][index].date.split('-')[1] == currentMonth){
+							monthData[category].push(entry);
+						}
+					});
+					if (monthData[category].length == 0){
+						delete monthData[category];
+					}
+				}
+				return monthData;
+			}
+
+			function getData(exhibit, table, axis='left', backgroundColor='rgba(0, 0, 255, 1)'){
+				const label = `${exhibit} ${table}`;
+				let data;
+				let dataCount;
+				let max;
+				if (currentChart == 'byDayAndHour'){
+					data = exhibitData[exhibit][table][currentDay].byHour;
+					dataCount = Object.values(data).map(item=>item.length);
+
+					const dayMax = [];
+
+					dayNames.forEach(day => {
+						let datacheck = exhibitData[exhibit][table][day].byHour;
+						dayMax.push(Math.max(...Object.values(datacheck).map(item=>item.length)));
+					});
+
+					max = Math.max(...dayMax);
+
+				} else {
+					data = exhibitData[exhibit][table][currentChart];
+					dataCount = Object.values(data).map(item=>item.length);
+					max = Math.max(...dataCount);
+				}
+
+
+				if (monthView){
+					data = filterByMonth(data);
+					dataCount = Object.values(data).map(item=>item.length);
+				}
+
+				let dataset = {label: label, data: dataCount, backgroundColor: backgroundColor, yAxisID: `${axis}Axis`};
+
+				return {labels: Object.keys(data), set: dataset, max: max};
+			}
+
+			function generateChart(){
+				let data = getData(currentExhibit, currentTable);
+				const datasets = [data.set]; 
+
+				let leftMax = data.max;
+				let rightMax = 0;
+
+				if (allExhibits){
+					exhibitNames.slice(1).forEach((exhibit, index) => {
+						let data = getData(exhibit, currentTable, 'left', `rgba(${50 + index * 100}, ${100 + index*50}, 255)`)
+						datasets.push(data.set);
+						if (data.max > leftMax){
+							leftMax = data.max;
+						}
+					});
+					
+					if (doubleChart){
+						exhibitNames.forEach((exhibit, index) => {
+							let data = getData(exhibit, tableNames[1], 'right', `rgba(255, ${230 - index * 50}, ${index * 100})`);
+							datasets.push(data.set);
+							if (data.max > rightMax){
+								rightMax = data.max;
+							}
+						});
+					}
+				}
+
+				else if (doubleChart){
+					data = getData(currentExhibit, tableNames[1], 'right', 'rgba(255, 230, 1)');
+					datasets.push(data.set);
+					rightMax = data.max;
+				}
+				
+
+				if (chart){
+					chart.destroy();
+				}
+
+
+				chart = new Chart(canvas, {
+					type: 'bar',
+					data: {
+						labels: data.labels,
+						datasets: datasets,
+					},
+					options: {
+						scales: {
+							'leftAxis': {
+								type: 'linear',
+								position: 'left',
+								beginAtZero: true,
+								suggestedMax: leftMax
+							},
+							'rightAxis': {
+								type: 'linear',
+								position: 'right',
+								beginAtZero: true,
+								display: false,
+								suggestedMax: rightMax,
+								grid: {
+									drawOnChartArea: false,
+								}
+							}
+						},
+						plugins: {
+							title: {
+								display: true,
+								text: (monthView) ? `${currentMonth}-${currentYear}` : ""
+							}
+						}
+					}
+				});
+
+				if (doubleChart){
+					chart.options.scales['rightAxis'].display = true;
+					chart.update();
+				}
+
+			}
+		
+			function changeExhibit(exhibit){
+				if (exhibit == 'all'){
+					currentExhibit = exhibitNames[0];
+					allExhibits = true;
+				} else {
+					currentExhibit = exhibit;
+					allExhibits = false;
+				}
+				generateChart();
+			}
+
+			function changeChart(chart){
+				currentChart = chart;
+				generateChart();
+			}
+
+			function changeTable(table){
+				if (table == 'both'){
+					currentTable = tableNames[0];
+					doubleChart = true;
+				} else {
+					currentTable = table;
+					doubleChart = false;
+				}
+				generateChart();
+			}
+
+			function changeDay(day){
+				currentDay = day;
+				generateChart();
+			}
+
+			const exhibitData = {};
+			for (const exhibit of exhibitNames){
+				exhibitData[exhibit] = {};
+				for (const table of tableNames){
+					let data = await getPhpResponse(`${exhibit}-${table}`);
+					exhibitData[exhibit][table] = {
+						name: `${exhibit}-${table}`,
+						data: data,
+						byDate: sortByDate(data),
+						byDay: sortByDay(data),
+						byHour: sortByHour(data),
+						startingYear: Number(data[0].date.split('-')[0]),
+						startingMonth: Number(data[0].date.split('-')[1]),
+						endingYear: Number(data[data.length - 1].date.split('-')[0]),
+						endingMonth: Number(data[data.length - 1].date.split('-')[1])
+					};
+
+					if (currentYear == null){
+						const firstTable = exhibitData[exhibit][table];
+						[currentYear, currentMonth, startingYear, startingMonth, endingYear, endingMonth] = [firstTable.startingYear, firstTable.startingMonth, firstTable.startingYear, firstTable.startingMonth, firstTable.endingYear, firstTable.endingMonth];
+					}
+
+					dayNames.forEach(day => {
+						exhibitData[exhibit][table][day] = {byHour: sortByHour(exhibitData[exhibit][table].byDay[day])};
+						if (day === "Wednesday"){
+							for (let hour of hours.slice(0, 7)){
+								delete exhibitData[exhibit][table][day].byHour[hour];
+							}
+						} else {
+							for (let hour of hours.slice(7)){
+								delete exhibitData[exhibit][table][day].byHour[hour];
+							}
+						}
+					});
+				}
+			}
+
+			HTMLsetup();
+			generateChart();
+
+
+		</script>
+	</head>
+	<body>
+		<div id="selectDiv">
+			<label for="selectExhibit">Choose an exhibit:</label>
+			<select id="selectExhibit"></select>
+
+			<label for="selectTable">Choose a table:</label>
+			<select id="selectTable"></select>
+
+			<label for="selectChart">Choose a chart:</label>
+			<select id="selectChart">
+				<option value="byDate">Sort by date</option>
+				<option value="byDay">Sort by day</option>
+				<option value="byHour">Sort by hour</option>
+				<option value="byDayAndHour">Sort by day and hour</option>
+			</select>
+			<label for="selectDay" id="dayLabel" style="visibility: hidden">Choose a day:</label>
+			<select id="selectDay" style="visibility: hidden"></select>
+		</div>
+		<div id="checkDiv">
+			<label for="monthFilter">Filter by month:</label>
+			<input type="checkbox" id="monthFilter" value="on">
+		</div>
+		<div id="monthSelectDiv">
+			<button class="monthSelectArrow" id="leftArrow" style="left: 700px; opacity: 0.25;">&larr;</button>
+			<button class="monthSelectArrow" id="rightArrow" style="left: 810px;">&rarr;</button>
+		</div>
+		<div id="chartDiv" class="container-fluid">
+			<canvas id="chartCanvas" class="row justify-content-center"></canvas>
+		</div>
+	</body>
+</html>
+            

@@ -1,0 +1,223 @@
+@font-face {
+  font-family: "Montserrat-Regular";
+  src: url("./fonts/Montserrat-Regular.eot"); /* IE9 Compat Modes */
+  src: url("./fonts/Montserrat-Regular.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+    url("./fonts/Montserrat-Regular.otf") format("opentype"), /* Open Type Font */
+    url("./fonts/Montserrat-Regular.svg") format("svg"), /* Legacy iOS */
+    url("./fonts/Montserrat-Regular.ttf") format("truetype"), /* Safari, Android, iOS */
+    url("./fonts/Montserrat-Regular.woff") format("woff"), /* Modern Browsers */
+    url("./fonts/Montserrat-Regular.woff2") format("woff2"); /* Modern Browsers */
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+    font-family: "Montserrat-Regular";
+    background-color: #ffce34;
+    font-weight: bold;
+    font-size: 1.1vw;
+}
+
+h2 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 2vw;
+    margin-top: 1vh;
+}
+
+h6 {
+    font-weight: bold;
+    font-size: 1.1vw;
+}
+
+select {
+    font-size: 0.9;
+    margin-left: 0.5vw;
+    margin-right: 0.5em;
+    height: fit-content;
+}
+
+#inputDiv {
+    background-color: #7a7b7e;
+    top: 0px;
+    border-bottom: 2px solid black;
+    position: absolute;
+    height: 11vh;
+    padding-left: 8px;
+}
+
+#grayoutDiv {
+    background-color: #7a7b7e;
+    top: 0px;
+    border-bottom: 2px solid black;
+    position: absolute;
+    height: 11vh;
+    z-index: 2;
+    opacity: 0.5;
+    display: none;
+}
+
+#selectDiv {
+    margin-top: 10px;
+}
+
+#filterDiv {
+    margin-top: 0.25em;
+    margin-bottom: 1vh;
+    margin-left: 0;
+    padding-left: 0;
+    padding-top: 1vh;
+    display: flex;
+}
+
+#monthLabel {
+    font-size: 1.1vw;
+}
+
+#monthFilter {
+    margin-left: 8px;
+    margin-right: 2px;
+    height: fit-content;
+    margin-top: 1vh;
+}
+
+#monthSelectDisplay {
+    visibility: hidden;
+    display: flex;
+}
+
+.monthArrow {
+    margin-left: 3px;
+    margin-right: 2px;
+    width: 32px;
+}
+
+#monthDisplay {
+    margin-left: 0.8vw;
+    margin-right: 0.8vw;
+    margin-top: 0.5vh;
+}
+
+#chartDiv {
+    position: absolute;
+    top: 11vh;
+    left: 2vw;
+    width: 80vw;
+    height: 85vh;
+    background-color: white;
+    border: 2px solid black;
+    border-top: 0px;
+}
+
+#backgroundText {
+    position: flex;
+    margin-top: 8vh;
+}
+
+#chartCanvas {
+    z-index: 2;
+}
+
+
+#compareButton{
+    position: absolute;
+    bottom: 1vh;
+    left: 1.5vw;
+    font-size: 1.2em;
+    padding-top: 0.5px;
+    padding-bottom: 0.5px;
+    visibility: hidden;
+}
+
+
+#overviewDiv {
+    position: absolute;
+    top: 11vh;
+    left: 82vw;
+    height: 85vh;
+    width: 16vw;
+    border: 2px solid black;
+    background-color: white;
+    border-left: 0px;
+    border-top: 0px;
+}
+
+#overviewTitle {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 20%;
+}
+
+.overviewContainer{
+    display: flex;
+    justify-content: left;
+}
+
+.overviewLabel {
+    font-size: 1.1vw;
+    margin-left: 1vw;
+}
+
+.overviewButton {
+    margin-left: auto;
+    margin-right: 0.4vw;
+    font-size: 0.75vw;
+    visibility: hidden;
+}
+
+#overviewData {
+    margin-top: 2vh;
+    margin-left: 1vw;
+    line-height: 1.4;
+}
+
+#chartCanvas {
+    position: absolute;
+    top: 20%;
+    transform: translateY(-20%);
+    margin: 1vw;
+}
+
+#popoutDiv {
+    position: absolute;
+    top: 16vh;
+    left: 10vw;
+    width: 80vw;
+    height: 70vh;
+    background-color: white;
+    border: 2px solid black;
+    z-index: 2;
+    display: none;
+}
+
+#popoutChartDiv {
+    width: 30vw;
+    height: auto;
+    margin-left: 2vw;
+}
+
+#popoutCanvas {
+    position: absolute;
+    margin: 1.6vw;
+    top: 5vh;
+}
+
+#popoutData {
+    position: absolute;
+    top: 13vh;
+}
+
+#YoYButton {
+    position: absolute;
+    bottom: 2vh;
+    visibility: hidden;
+    font-size: 1.5vw;
+}
+
+#closePopout {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    right: -2px;
+    top: -2px;
+}
