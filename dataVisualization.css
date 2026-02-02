@@ -1,12 +1,12 @@
 @font-face {
   font-family: "Montserrat-Regular";
-  src: url("./fonts/Montserrat-Regular.eot"); /* IE9 Compat Modes */
-  src: url("./fonts/Montserrat-Regular.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
-    url("./fonts/Montserrat-Regular.otf") format("opentype"), /* Open Type Font */
-    url("./fonts/Montserrat-Regular.svg") format("svg"), /* Legacy iOS */
-    url("./fonts/Montserrat-Regular.ttf") format("truetype"), /* Safari, Android, iOS */
-    url("./fonts/Montserrat-Regular.woff") format("woff"), /* Modern Browsers */
-    url("./fonts/Montserrat-Regular.woff2") format("woff2"); /* Modern Browsers */
+  src: url("./css/fonts/Montserrat-Regular.eot"); /* IE9 Compat Modes */
+  src: url("./css/fonts/Montserrat-Regular.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+    url("./css/fonts/Montserrat-Regular.otf") format("opentype"), /* Open Type Font */
+    url("./css/fonts/Montserrat-Regular.svg") format("svg"), /* Legacy iOS */
+    url("./css/fonts/Montserrat-Regular.ttf") format("truetype"), /* Safari, Android, iOS */
+    url("./css/fonts/Montserrat-Regular.woff") format("woff"), /* Modern Browsers */
+    url("./css/fonts/Montserrat-Regular.woff2") format("woff2"); /* Modern Browsers */
   font-weight: normal;
   font-style: normal;
 }

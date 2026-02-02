@@ -91,7 +91,7 @@ function generateChart(){
         	    const chartData = sortedData.data.map(data => data[type]);
                 const graphLabel = `${exhibit.name}: ${stats[type].name}`;
 			    const dataColor = colors[exhibitIndex] + (typeIndex > 0 ? '55' : 'ff');
-
+				
 				// Create the overview data object for this exhibit and data type:
 
 			    overviewData[exhibit.ID][type] = {
@@ -106,6 +106,7 @@ function generateChart(){
 				    },
 				    color: dataColor
 			    }
+
 
 				// Create a dataset to be displayed in the chart:
         	    datasets.push({label: graphLabel, data: chartData, borderWidth: borderWidth, borderColor: '#000000', backgroundColor: dataColor, stack: `Stack ${exhibitIndex}`});
@@ -223,7 +224,7 @@ function generateOverview(exhibit, type){
 	let dataText = `<b>Maximum:</b><br>${overviewSet.maxEntry}<br>${max.data} ${max.unit}
 	                <br><br>
 	                <b>Average:</b><br>${avg.data} ${avg.unit}<br><br>`;
-	if (type != 'avgDwell' && type != 'maxDwell' && type != 'avgDuration' && type != 'maxDuration'){ // Exclude 'total' data from types that it does not make sense for (e.g. total average is meaningless).
+	if (type != 'avgDwell' && type != 'maxDwell' && type != 'avgDuration' && type != 'maxDuration' && !type.includes('Engagement')){ // Exclude 'total' data from types that it does not make sense for (e.g. total average is meaningless).
 		dataText += `<b>Total:</b><br>${total.data} ${total.unit}<br><br>`;
 	}
 	if (type.includes('Choice')){ // If the current data type is choice data, build that text.
@@ -294,7 +295,6 @@ function generatePopout(event){
 
 		// Calculate total and active time in the selected timeframe:
 		const totalTime = secondsInTimeframe(timeframe) * popoutTable.dayCount();
-		console.log(popoutTable.dayCount())
 		const activeTime = popoutTable['totalActivation'];
 		const idleTime = totalTime - activeTime;
 
@@ -344,7 +344,7 @@ function generatePopout(event){
 
 		// Build the text to be displayed in the popout:
 		let dataText = '';
-
+		console.log(exhibit.stats)
 		for (const data of exhibit.stats){
 			if (data.includes('Choice')){
 				const choiceString = data.replace(/([a-z])([A-Z])/g, '$1 $2');

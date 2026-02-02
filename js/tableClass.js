@@ -8,7 +8,7 @@
  * 
  * A Table object is generated for each exhibit. This contains all data drawn from the SQL tables,
  * and various methods for sorting the data in different ways. Each time a table is filtered into a given time frame, 
- * a new Table object will also be created holding data in that time frame..
+ * a new Table object will also be created holding data in that time frame.
  * 
  */
 
@@ -155,6 +155,20 @@ class Table {
         this.totalDwell = noDwell ? 0 : getTotal(dwellData); //Total dwell time over the time period of the table.
         this.avgDwell = noDwell ? 0 : parseFloat((this.totalDwell/ dwellData.length).toFixed(2)); //Average dwell time over the time period of the table.
         this.maxDwell = noDwell ? 0 : Math.max(...dwellData); //Maximum dwell time over the time period of the table.
+    }
+
+    engagementData(){
+        for (const engagementType of this.exhibit.engagement){
+            if (!this.exhibit.stats.includes(`${engagementType.stat}Engagement`)){
+                this.exhibit.stats.push(`${engagementType.stat}Engagement`);
+            }
+            if (!(engagementType.stat in stats)){
+                stats[`${engagementType.stat}Engagement`] = {name: 'Average ' + camelSplit(engagementType.stat), unit: engagementType.unit}
+            }
+
+            const engagementData = this['engagement'].data.map(entry => entry[engagementType.stat]);
+            this[`${engagementType.stat}Engagement`] = (engagementData.length == 0) ? 0 : parseFloat((getTotal(engagementData) / engagementData.length).toFixed(2));
+        }
     }
 
     // choiceData creates an object property of the table for each choice defined for the exhibit in its json config file. It will find all choice options and calculate how many times each was chosen in the table data.

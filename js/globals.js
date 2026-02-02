@@ -24,7 +24,13 @@ const stats = { //Axis labels and unit names for each data type
 };
 
 
-const galleryList = [{id: 'OW', name: 'Other Worlds'}, {id: 'PXP', name: 'PXP'}, {id: 'WTST', name: 'Walk Through Space and Time'}, {id: 'TS', name: 'Telescopes'}]; // List of galleries represented in the data by ID and full name
+const galleryList = [ // List of galleries represented in the data by ID and full name
+    {id: 'OW', name: 'Other Worlds'},
+    {id: 'PXP', name: 'PXP'}, 
+    {id: 'WTST', name: 'Walk Through Space and Time'}, 
+    {id: 'TS', name: 'Telescopes'},
+    {id: 'MM', name: 'Mission Moon'}
+]; 
 
 const colors = ['#ffce34', '#bfd730', '#4C1720']; //Iteratable colors for graphs
 

@@ -47,7 +47,6 @@ async function changeGallery(gallery){
 				const galleryJSON = JSON;
 				const exhibitPromises = []; // Create an array to hold the promises created by fetching the exhibit data.
 				exhibits = new Array(galleryJSON.length); //Exhibits is defined in the 'globals.js' file for reference across multiple scripts. Here it is set to an empty array for the exhibit objects to be stored in.
-
 				for (const [exhibitIndex, exhibitJSON] of galleryJSON.entries()){
 					const exhibit = new Exhibit(exhibitJSON.ID, "Data Visualization"); // Create an exhibit object for each exhibit ID in the json file. This is passed the string 'Data Visualization' to note that any errors come from this page and not that actual exhibit.
 				
@@ -98,9 +97,9 @@ async function changeGallery(gallery){
 				$('#backgroundText').html('');
 				changeExhibit(0);
 			})
-			.catch(error => {
+		/*	.catch(error => {
 				console.error(`Error fetching gallery data: ${error}`);
-			});
+			});*/
 }
 
 // Change the currently displayed exhibit. Handles updating the data categories to be displayed.
@@ -122,11 +121,8 @@ function changeExhibit(exhibitIndex){
 	
 	for (const stat of current.exhibit[0].stats){
 		if (stat.includes('Choice') && !(stat in stats)){
-			const statName = stat.replace(/([a-z])([A-Z])/g, '$1 $2');
-			const statArray = statName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).slice(0, -1);
-			const statFullName = statArray.join(' ');
 
-			stats[stat] = {name: statFullName, unit: '# Times chosen'};
+			stats[stat] = {name: camelSplit(stat).replace('Data', ''), unit: '# Times chosen'};
 		}
 		option = document.createElement("option");
 		option.value = stat;

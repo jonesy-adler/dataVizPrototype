@@ -14,6 +14,12 @@ function cleanUnit(type){
 	return stats[type].unit.replace('(', '').replace(')', '').replace('Time ', '').replace('# ', '').replace('Times chosen', 'choices').replace('Sessions', 'completions');
 }
 
+function camelSplit(string){
+	const stringSplit = string.replace(/([a-z])([A-Z])/g, '$1 $2');
+	const stringArray = stringSplit.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1));
+	return stringArray.join(' ');
+}
+
 // timeInSeconds takes the 'time' property of a data element as an input and returns that time in seconds, for ease of comparison.
 // the time is in the format HH:MM:SS and must be split first.
 function timeInSeconds(time){
