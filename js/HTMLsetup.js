@@ -142,6 +142,7 @@ function changeExhibit(exhibitIndex){
     	$('#selectData').append(option);
 	}
 
+	// Make sure the current month and year is within the range of the exhibit's data:
 	if (current.year < current.exhibit[0].startingYear){
 		current.year = current.exhibit[0].startingYear;
 		current.month = current.exhibit[0].startingMonth;
@@ -150,6 +151,7 @@ function changeExhibit(exhibitIndex){
 		current.month = current.exhibit[0].startingMonth;
 	}
 
+	// Enable the compare group button if there is more than one exhibit in the group:
 	const buttonVis = current.exhibit[0].group && exhibitIndex != 'all';
 	$('#compareButton').css('visibility', buttonVis ? 'visible' : 'hidden');
 
@@ -158,48 +160,54 @@ function changeExhibit(exhibitIndex){
 	generateChart();
 }
 
+// changeChart updates the timeframe displayed in the chart:
 function changeChart(chart){
 	current.chart = chart;
 	generateChart();
 }  
 
+// changeData updates the stat showed in the chart:
 function changeData(data){
-        if (data == 'activationRatio'){
+        if (data == 'activationRatio'){ // For data that compares multiple other stats, build out the array:
             current.data = ['totalActivation', 'totalDwell'];
         } 
                     
-        else {
+        else { // Otherwise, just make the array the current stat: 
 		    current.data = [data];
         }
 	    generateChart();
 }
 
+// changeDay changes the currently viewed day when in day and hour view:
 function changeDay(day){
 	current.day = day;
 	generateChart();
 }
 
+// changeMonth changes the currently viewed month when in month view. This can be called with no parameter to update when current month or year are changed programatically.
 function changeMonth(direction = null){
 	if (direction == "previous"){
-		if (current.year == current.exhibit[0].startingYear && current.month == current.exhibit[0].startingMonth){
+		if (current.year == current.exhibit[0].startingYear && current.month == current.exhibit[0].startingMonth){ // Do nothing if we are at the first month in the data.
 			return;
 		}
 		current.month--;
 
-		if (current.month == 0){
+		if (current.month == 0){ // Cycle to the end of the previous year if going back from January.
 			current.month = 12;
 			current.year--;
 		}
 	} else if (direction == "next"){
-		if (current.year == exhibits.endingYear && current.month == exhibits.endingMonth){
+		if (current.year == exhibits.endingYear && current.month == exhibits.endingMonth){ // Do nothing if we are at the last month in the data.
 			return;
 		}
 		current.month++;
-		if (current.month == 13){
+		if (current.month == 13){ // Cycle to the beginning of the next year if going foward from December.
 			current.month = 1;
 			current.year++;
 		}
-	}
+	} 
+
+	// Make the forward or back button grayed out if we are at the last or first month of the data:
     if (current.year == current.exhibit[0].startingYear && current.month == current.exhibit[0].startingMonth){
 		$('#leftMonthArrow').css('opacity', 0.25);
 	} else {
@@ -218,19 +226,21 @@ function changeMonth(direction = null){
 }
 
 
-
+// Build the gallery select menu:
 for (const gallery of galleryList){
 	let option = document.createElement("option");
 	option.value = gallery.id;
 	option.text = gallery.name;
 	$('#selectGallery').append(option);
 }
+// Select the first gallery in the list:
+await changeGallery(galleryList[0].id);
 
+// Bind functions to the select menus:
 $('#selectGallery').change(() => {
 	changeGallery($('#selectGallery').val());
-})
+});
 
-await changeGallery(galleryList[0].id);
 
 $('#selectExhibit').change(() => {
 	changeExhibit($('#selectExhibit').val());
