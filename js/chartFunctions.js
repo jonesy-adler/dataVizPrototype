@@ -26,11 +26,11 @@ function generateChart(){
                 dataTable = dataTable.filterTable([current.year, current.month], 'month');
             }
 
-			const borderWidth = (current.chart == 'date' && !current.monthView) ? 0 : 1; // Remove the border around each bar when in full date view (the bars are mostly border otherwise.)
 
         	const sortedData = dataTable.sort(); // Sort the full data table into timeframes depending on the current chart view. This returns an object with one array of data tables and another array with the matching timeframes.
 			current.sortedData.push(sortedData); // Push the sorted data into an array for later reference.
        		labels = sortedData.timeframe; // The timeframe array from the sorted data becomes labels for the bars.
+			const borderWidth = (sortedData.data.length > 100) ? 0 : 1; // Remove the border around each bar when there are more than 100 bars (the bars are mostly border otherwise.)
 
 			// Now we access the data from the tables and prep it to be displayed as bars.
 			
@@ -40,7 +40,8 @@ function generateChart(){
                 for (const [choiceIndex, choice] of exhibit[`${type}Options`].entries()){ // For each option associated with this choice, create a dataset to be stacked in the chart:
                     const chartData = sortedData.data.map(data => data[type][choice]);
                     const graphLabel = `${exhibit.name}: ${choice} Chosen`;
-                    const dataColor = colors[exhibitIndex] + (255 - choiceIndex * 250/(exhibit[`${type}Options`].length)).toString(16);
+                    const dataColor = colors[exhibitIndex] + (255 - choiceIndex * Math.round(250/(exhibit[`${type}Options`].length))).toString(16);
+					console.log(dataColor);
                     datasets.push({label: graphLabel, data: chartData, borderWidth: borderWidth, borderColor: '#000000', backgroundColor: dataColor, stack: `Stack ${exhibitIndex}`});
                     choiceData[choice] = chartData;
                 }
@@ -109,7 +110,7 @@ function generateChart(){
 
 
 				// Create a dataset to be displayed in the chart:
-        	    datasets.push({label: graphLabel, data: chartData, borderWidth: borderWidth, borderColor: '#000000', backgroundColor: dataColor, stack: `Stack ${exhibitIndex}`});
+        	    datasets.push({label: graphLabel, data: chartData, borderWidth: borderWidth, borderColor: '#000000', backgroundColor: dataColor, stack: `Stack ${exhibitIndex * current.exhibit.length + typeIndex}`});
 				
 				current.stacks = 1;
 
@@ -209,7 +210,7 @@ function generateOverview(exhibit, type){
 
 	// Display the current exhibit name (or nickname, if there is one) and data type
 	$('#overviewExhibit').html(exhibit.nickname ? exhibit.nickname : exhibit.name);
-	$('#overviewType').html(stats[type].name.replace('imum', '').replace('Total ', '').replace('Session ', ''));
+	$('#overviewType').html(stats[type].name.replace('imum', '').replace('Total ', '').replace('Session ', '').replace('Average ', ''));
 
 	// Create buttons to cycle through the exhibits and data types currently displayed in the chart, if there is more than one:
 	$('#overviewExhibitButton').css('visibility', current.exhibit.length > 1 ? 'visible' : 'hidden');

@@ -111,10 +111,12 @@ function changeExhibit(exhibitIndex){
 		current.exhibit = [exhibits[exhibitIndex]];
 	}
 
+	// If the currently displayed stat is not in the current exhibit, change it to the first stat for the exhibit
 	if (!current.exhibit[0].stats.includes(current.data[0])){
 		changeData(current.exhibit[0].stats[0])
 	}
 
+	// Build the dropdown data menu for the exhibit:
 	$('#selectData').empty();
 
 	let option;
@@ -132,7 +134,8 @@ function changeExhibit(exhibitIndex){
 
 	$('#selectData').val(current.data[0]);
 
-	if (current.exhibit[0].type == 'dwellVideo'){
+
+	if (current.exhibit[0].types.includes('dwellVideo')){
 		option = document.createElement("option");
 		option.value = 'activationRatio';
 		option.text = 'Activation vs Dwell Time';
